@@ -3,7 +3,7 @@ package osama.me.viewmodelannotations
 import android.view.View
 import android.widget.TextView
 
-
+//Proposed location for BindFields annotation to generate lines such as 11 and 12
 class MainItemViewHolder(itemView : View) : BaseViewHolder<AKindOfObject>( itemView) {
 
     override fun bind(item: AKindOfObject?) {
