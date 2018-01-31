@@ -1,5 +1,6 @@
 package osama.me.vmannotation_processor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -37,27 +38,39 @@ public class VmAnnotationProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (Element element : roundEnv.getElementsAnnotatedWith(BindFields.class)) {
-            messager.printMessage(OTHER, element.getClass().getCanonicalName() + " : " + element.getKind());
-
             if (element.getKind() != ElementKind.METHOD) {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Can only be applied to Methods");
                 return false;
             }
 
-            ExecutableElement ee = (ExecutableElement) element;
-            List<? extends VariableElement> parameters = ee.getParameters();
-            for (VariableElement ve : parameters) {
-                Element asElement = typeUtils.asElement(ve.asType());
-                List<VariableElement> fieldsInArgument = ElementFilter.fieldsIn(asElement.getEnclosedElements());
-                writeToJavaFile(fieldsInArgument, ve.getSimpleName().toString());
+            List<? extends VariableElement> parameters = ((ExecutableElement) element).getParameters();
+            for (VariableElement variable : parameters) {
+                generateNewMethod((ExecutableElement) element, variable);
             }
         }
         return false;
     }
 
+    private void generateNewMethod(final ExecutableElement method, final VariableElement variable) {
 
-    void writeToJavaFile(List<VariableElement> fieldsInArgument , String argumentName ){
-        messager.printMessage(OTHER, String.format("argumentName:  %s, fieldsInArgument %s", argumentName, Arrays.deepToString(fieldsInArgument.toArray())));
+        Element variableAsElement = typeUtils.asElement(variable.asType());
+        List<VariableElement> fieldsInArgument = ElementFilter.fieldsIn(variableAsElement.getEnclosedElements());
+
+        int[] annotationArgs = method.getAnnotation(BindFields.class).viewIds();
+        ArrayList<Integer> viewIds = new ArrayList<>();
+        for (final int annotationArg : annotationArgs) {
+            viewIds.add(annotationArg);
+        }
+
+        messager.printMessage(OTHER,
+                String.format("modifiers: %s , returntype: %s, methodname: %s, argumentName:  %s, fieldsInArgument %s, annotation_args %s",
+                        Arrays.deepToString(method.getModifiers().toArray()),
+                        method.getReturnType().getKind().toString(),
+                        method.getSimpleName().toString(),
+                        variableAsElement.getSimpleName(),
+                        Arrays.deepToString(fieldsInArgument.toArray()),
+                        Arrays.deepToString(viewIds.toArray()))
+        );
     }
 
     @Override

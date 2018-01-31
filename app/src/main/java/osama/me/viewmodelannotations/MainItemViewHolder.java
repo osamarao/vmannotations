@@ -9,13 +9,13 @@ public class MainItemViewHolder extends BaseViewHolder<AKindOfObject> {
 
     private View itemView;
 
-    public MainItemViewHolder(final View itemView) {
+    MainItemViewHolder(final View itemView) {
         super(itemView);
 
         this.itemView = itemView;
     }
 
-    @BindFields
+    @BindFields(viewIds = {23, 3, 4, 5})
     @Override
     protected void bind(final AKindOfObject item) {
         super.bind(item);
