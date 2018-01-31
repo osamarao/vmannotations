@@ -23,8 +23,8 @@ public class MainRecyclerViewAdapter extends BaseAdapter {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
-        //noinspection unchecked
         ((BaseViewHolder) holder).bind(getObject(position));
     }
 
