@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/ViewModelAnnotations.iml" filepath="$PROJECT_DIR$/ViewModelAnnotations.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/vmannotation/vmannotation.iml" filepath="$PROJECT_DIR$/vmannotation/vmannotation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/vmannotation-processor/vmannotation-processor.iml" filepath="$PROJECT_DIR$/vmannotation-processor/vmannotation-processor.iml" />
     </modules>
   </component>
 </project>

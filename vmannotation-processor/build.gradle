@@ -1,0 +1,13 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.google.guava:guava:23.6-jre'
+    implementation 'com.squareup:javapoet:1.10.0'
+    implementation project(':vmannotation')
+    testImplementation 'com.google.testing.compile:compile-testing:0.15'
+    testImplementation 'com.google.truth:truth:0.37'
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"

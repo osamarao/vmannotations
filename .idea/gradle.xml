@@ -10,6 +10,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/vmannotation" />
+            <option value="$PROJECT_DIR$/vmannotation-processor" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
