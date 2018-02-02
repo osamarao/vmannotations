@@ -1,10 +1,11 @@
 package osama.me.vmannotation_processor;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeSpec;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,27 +23,21 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 import osama.me.vmannotation.BindFields;
-
-import static javax.tools.Diagnostic.Kind.NOTE;
-import static javax.tools.Diagnostic.Kind.OTHER;
 
 public class VmAnnotationProcessor extends AbstractProcessor {
 
     private Messager messager;
     private Types typeUtils;
     private Filer filer;
-    private Elements elementUtils;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         messager = processingEnv.getMessager();
         typeUtils = processingEnv.getTypeUtils();
-        elementUtils = processingEnv.getElementUtils();
         filer = processingEnv.getFiler();
     }
 
@@ -67,42 +62,35 @@ public class VmAnnotationProcessor extends AbstractProcessor {
         Element variableAsElement = typeUtils.asElement(variable.asType());
         List<VariableElement> fieldsInArgument = ElementFilter.fieldsIn(variableAsElement.getEnclosedElements());
 
-        int[] annotationArgs = method.getAnnotation(BindFields.class).viewIds();
-        ArrayList<Integer> viewIds = new ArrayList<>();
-        for (final int annotationArg : annotationArgs) {
-            viewIds.add(annotationArg);
-        }
+        String[] annotationArgs = method.getAnnotation(BindFields.class).viewIds();
 
-        messager.printMessage(OTHER,
-                String.format("modifiers: %s , returntype: %s, methodname: %s, argumentName:  %s, fieldsInArgument %s, annotation_args %s",
-                        Arrays.deepToString(method.getModifiers().toArray()),
-                        method.getReturnType().getKind().toString(),
-                        method.getSimpleName().toString(),
-                        variable.getSimpleName(),
-                        Arrays.deepToString(fieldsInArgument.toArray()),
-                        Arrays.deepToString(viewIds.toArray()))
-        );
-
-        MethodSpec main = MethodSpec.methodBuilder("bindfields")
+        MethodSpec.Builder mainBuilder = MethodSpec.methodBuilder("bindfields")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(void.class)
-                .addParameter(ClassName.get(variableAsElement.asType()), variable.getSimpleName().toString() )
-                .addStatement("$T.out.println($S)", System.class, "Hello, JavaPoet!")
+                .addParameter(ClassName.get(variableAsElement.asType()), variable.getSimpleName().toString())
+                .addParameter(ClassName.get("android.view", "View"), method.getAnnotation(BindFields.class).viewName());
+
+        for (int i = 0; i < annotationArgs.length; i++) {
+            mainBuilder.addStatement("(($T) $L.findViewById(R.id.$L)).setText($L.$L)",
+                    ClassName.get("android.widget", "TextView"),
+                    method.getAnnotation(BindFields.class).viewName(),
+                    annotationArgs[i],
+                    variable.getSimpleName(),
+                    fieldsInArgument.get(i).getSimpleName());
+        }
+
+        TypeSpec bindFieldsType = TypeSpec.classBuilder(method.getEnclosingElement().getSimpleName() + "_BindFields")
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addMethod(mainBuilder.build())
                 .build();
 
-        messager.printMessage(NOTE, main.toString());
+        JavaFile javaFile = JavaFile.builder("osama.me.viewmodelannotations", bindFieldsType).build();
 
-//        TypeSpec helloWorld = TypeSpec.classBuilder("HelloWorld")
-//                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-//                .addMethod(main)
-//                .build();c
-//
-//        JavaFile javaFile = JavaFile.builder("com.example.helloworld", helloWorld)
-//                .build();
-//
-//        javaFile.writeTo(System.out);
-
-
+        try {
+            javaFile.writeTo(filer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
